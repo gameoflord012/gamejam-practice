@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
     [SerializeField] float speed = 3;
     [SerializeField] float jumpForce = 10;
+    [SerializeField] ColliderFilter groundDetector;
  
     Rigidbody2D rb;
 
@@ -19,7 +20,7 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
             rb.velocity = new Vector2(GetInputAxis().x * speed, rb.velocity.y);
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && groundDetector.GetTouchCols().Count > 0)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
