@@ -29,15 +29,33 @@ public class Player : MonoBehaviour
     [SerializeField] float airHorizontalAcceleration = 100;
 
 
-    [Header("Collider")]
+    [Header("Detector")]
     [SerializeField] ColliderFilter groundDetector;
     [SerializeField] ColliderFilter leftWallDetector;
     [SerializeField] ColliderFilter rightWallDetector;
 
     [Header("Others")]
-    [SerializeField] float globalStrengthScale = 1;
     [SerializeField] float wallPushOutForce = 100;
-    [SerializeField] float wallFriction = 0.5f;
+    [Range(1f, 50f)]
+    [SerializeField] float wallFriction = 10f;
+
+    [Header("Strength Scales")]
+    [Range(0f, 6)]
+    [SerializeField] float tireness = 1;
+    [Range(0f, 5f)]
+    [SerializeField] float groundJumpForceModifier = 1;
+    [Range(0f, 5f)]
+    [SerializeField] float airJumpForceModifier = 1;
+    [Range(0f, 5f)]
+    [SerializeField] float jumpForceOvertimeModifier = 1;
+    [Range(0f, 5f)]
+    [SerializeField] float horizontalSpeedModifier = 1;
+    [Range(0f, 5f)]
+    [SerializeField] float airHorizontalAccelerationModifier = 1;
+    [Range(0f, 5f)]
+    [SerializeField] float wallFrictionModifier = 1;
+    [Range(0f, 5f)]
+    [SerializeField] float wallPushOutForceModifier = 1;
 
     Rigidbody2D rb;
 
@@ -49,37 +67,37 @@ public class Player : MonoBehaviour
 
     float GetHorizontalSpeed()
     {
-        return horizontalSpeed * globalStrengthScale;
+        return horizontalSpeed - Mathf.Min(horizontalSpeed, tireness * horizontalSpeedModifier);
     }
 
     float GetGroundJumpForce()
     {
-        return groundJumpForce * globalStrengthScale;
+        return groundJumpForce - Mathf.Min(groundJumpForce, tireness * groundJumpForceModifier);
     }
 
     float GetWallFriction()
     {
-        return wallFriction / globalStrengthScale;
+        return wallFriction - Mathf.Min(wallFriction, tireness * wallFrictionModifier);
     }
 
     float GetAirHorizontalAcceleration()
     {
-        return airHorizontalAcceleration * globalStrengthScale;
+        return airHorizontalAcceleration - Mathf.Min(airHorizontalAcceleration, tireness * airHorizontalAccelerationModifier);
     }
 
     float GetAirJumpForce()
     {
-        return airJumpForce * globalStrengthScale;
+        return airJumpForce - Mathf.Min(airJumpForce, tireness * airJumpForceModifier);
     }
 
     float GetWallPushOutForce()
     {
-        return wallPushOutForce * globalStrengthScale;
+        return wallPushOutForce - Mathf.Min(wallPushOutForce, tireness * wallPushOutForceModifier);
     }
 
     float GetJumpForceOvertime()
     {
-        return jumpForceOvertime * globalStrengthScale;
+        return jumpForceOvertime - Mathf.Min(jumpForceOvertime, tireness * jumpForceOvertimeModifier);
     }
 
     private void Start()
@@ -96,7 +114,7 @@ public class Player : MonoBehaviour
     {
         UpdateHorizontalMovement();
         UpdateJumpLogic();
-        rb.gravityScale = IsTouchWall() ? initialGravityScale * GetWallFriction() : initialGravityScale;
+        rb.gravityScale = IsTouchWall() ? Mathf.Max(0, initialGravityScale - GetWallFriction()) : initialGravityScale;
 
         playerEvents.Clear();
     }
