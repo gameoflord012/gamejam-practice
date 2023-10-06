@@ -876,6 +876,10 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: strengthScale
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: groundJumpForce
       value: 10
       objectReference: {fileID: 0}

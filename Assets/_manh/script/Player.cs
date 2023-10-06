@@ -18,22 +18,26 @@ public class Player : MonoBehaviour
         StopJump
     }
 
+    [Header("Jump")]
     [SerializeField] float groundJumpForce = 10;
-    [SerializeField] float jumpForceAir = 10;
+    [SerializeField] float airJumpForce = 10;
     [SerializeField] float jumpForceOvertime = 1;
+    [SerializeField] float jumpDuration = 0.3f;
 
-    [SerializeField] float wallPushOutForce = 100;
+    [Header("Moving")]
     [SerializeField] float horizontalSpeed = 10;
     [SerializeField] float airHorizontalAcceleration = 100;
 
-    [SerializeField] float friction = 0.5f;
 
-
+    [Header("Collider")]
     [SerializeField] ColliderFilter groundDetector;
     [SerializeField] ColliderFilter leftWallDetector;
     [SerializeField] ColliderFilter rightWallDetector;
 
-    [SerializeField] float jumpDuration = 0.3f;
+    [Header("Others")]
+    [SerializeField] float globalStrengthScale = 1;
+    [SerializeField] float wallPushOutForce = 100;
+    [SerializeField] float wallFriction = 0.5f;
 
     Rigidbody2D rb;
 
@@ -42,6 +46,41 @@ public class Player : MonoBehaviour
     float jumpTimer = 100;
 
     List<CharacterEvent> playerEvents = new();
+
+    float GetHorizontalSpeed()
+    {
+        return horizontalSpeed * globalStrengthScale;
+    }
+
+    float GetGroundJumpForce()
+    {
+        return groundJumpForce * globalStrengthScale;
+    }
+
+    float GetWallFriction()
+    {
+        return wallFriction / globalStrengthScale;
+    }
+
+    float GetAirHorizontalAcceleration()
+    {
+        return airHorizontalAcceleration * globalStrengthScale;
+    }
+
+    float GetAirJumpForce()
+    {
+        return airJumpForce * globalStrengthScale;
+    }
+
+    float GetWallPushOutForce()
+    {
+        return wallPushOutForce * globalStrengthScale;
+    }
+
+    float GetJumpForceOvertime()
+    {
+        return jumpForceOvertime * globalStrengthScale;
+    }
 
     private void Start()
     {
@@ -57,7 +96,7 @@ public class Player : MonoBehaviour
     {
         UpdateHorizontalMovement();
         UpdateJumpLogic();
-        rb.gravityScale = IsTouchWall() ? initialGravityScale * friction : initialGravityScale;
+        rb.gravityScale = IsTouchWall() ? initialGravityScale * GetWallFriction() : initialGravityScale;
 
         playerEvents.Clear();
     }
@@ -77,12 +116,12 @@ public class Player : MonoBehaviour
             if (IsOnGround())
             {
                 rb.velocity = new Vector2(
-                    GetMoveAxis().x * horizontalSpeed,
+                    GetMoveAxis().x * GetHorizontalSpeed(),
                     rb.velocity.y);
             }
             else
             {
-                rb.AddForce(GetMoveAxis() * airHorizontalAcceleration);
+                rb.AddForce(GetMoveAxis() * GetAirHorizontalAcceleration());
             }
         }
     }
@@ -92,10 +131,10 @@ public class Player : MonoBehaviour
         {
             if (IsOnGround() || IsTouchWall())
             {
-                rb.AddForce(Vector2.up * groundJumpForce, ForceMode2D.Impulse);
+                rb.AddForce(Vector2.up * GetGroundJumpForce(), ForceMode2D.Impulse);
 
                 if(!IsOnGround())
-                    rb.AddForce(GetTouchedWallDirection() * wallPushOutForce, ForceMode2D.Impulse);
+                    rb.AddForce(GetTouchedWallDirection() * GetWallPushOutForce(), ForceMode2D.Impulse);
 
                 // Debug.Log("GetTouchedWallDirection" + GetTouchedWallDirection());
 
@@ -104,7 +143,7 @@ public class Player : MonoBehaviour
             }
             else if (groundJumped)
             {
-                rb.AddForce(Vector2.up * jumpForceAir, ForceMode2D.Impulse);
+                rb.AddForce(Vector2.up * GetAirJumpForce(), ForceMode2D.Impulse);
                 groundJumped = false;
 
                 jumpTimer = 0;
@@ -120,7 +159,7 @@ public class Player : MonoBehaviour
 
         if (isJumping)
         {
-            rb.AddForce(Vector2.up * jumpForceOvertime);
+            rb.AddForce(Vector2.up * GetJumpForceOvertime());
             jumpTimer += Time.deltaTime;
         }
     }
