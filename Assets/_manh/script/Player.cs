@@ -9,11 +9,14 @@ public class Player : MonoBehaviour
     [SerializeField] float jumpForceGround = 10;
     [SerializeField] float jumpForceAir = 10;
     [SerializeField] float jumpForceOvertime = 1;
-    [SerializeField] float wallPushOutForce = 100;
 
+    [SerializeField] float wallPushOutForce = 100;
     [SerializeField] float horizontalSpeed = 10;
     [SerializeField] float airHorizontalAcceleration = 100;
     [SerializeField] float snapThreshold = 0.1f;
+
+    [SerializeField] float friction = 0.5f;
+
 
     [SerializeField] ColliderFilter groundDetector;
     [SerializeField] ColliderFilter leftWallDetector;
@@ -25,18 +28,40 @@ public class Player : MonoBehaviour
 
     bool groundJumped = false;
     bool isWallJumping = false;
+    float initialGravityScale;
     float jumpTimer = 100;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        initialGravityScale = rb.gravityScale;
     }
 
     private void Update()
     {
-        if (!Mathf.Approximately(GetMoveAxis().sqrMagnitude, 0))
+        UpdateHorizontalSpeed();
+
+        UpdateJumpLogic();
+
+        rb.gravityScale = IsTouchWall() ? initialGravityScale * friction : initialGravityScale;
+
+        // Debug.Log(jumpTimer);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("obstacle"))
         {
-            if (IsTouchGround())
+            gameObject.SetActive(false);
+        }
+    }
+
+    private void UpdateHorizontalSpeed()
+    {
+        bool isReceiveMoveInput = !Mathf.Approximately(GetMoveAxis().sqrMagnitude, 0);
+        if (isReceiveMoveInput)
+        {
+            if (IsOnGround())
             {
                 rb.velocity = new Vector2(
                     GetMoveAxis().x * horizontalSpeed,
@@ -47,21 +72,17 @@ public class Player : MonoBehaviour
                 rb.AddForce(GetMoveAxis() * airHorizontalAcceleration);
             }
         }
-
-        UpdateJumpLogic();
-
-        // Debug.Log(jumpTimer);
     }
 
     private void UpdateJumpLogic()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (IsTouchGround() || IsTouchWall())
+            if (IsOnGround() || IsTouchWall())
             {
                 rb.AddForce(Vector2.up * jumpForceGround, ForceMode2D.Impulse);
 
-                if(!IsTouchGround())
+                if(!IsOnGround())
                     rb.AddForce(GetTouchedWallDirection() * wallPushOutForce, ForceMode2D.Impulse);
 
                 Debug.Log("GetTouchedWallDirection" + GetTouchedWallDirection());
@@ -97,7 +118,7 @@ public class Player : MonoBehaviour
         return leftWallDetector.GetTouchCols().Count > 0 || rightWallDetector.GetTouchCols().Count > 0;
     }
 
-    bool IsTouchGround()
+    bool IsOnGround()
     {
         return groundDetector.GetTouchCols().Count > 0;
     }
@@ -112,7 +133,7 @@ public class Player : MonoBehaviour
 
     Vector2 GetInputAxis()
     {
-        return new Vector2(Input.GetAxis("Horizontal"), 0 * Input.GetAxis("Vertical"));
+        return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
     }
 
     Vector2 GetMoveAxis()
