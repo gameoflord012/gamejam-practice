@@ -6,14 +6,25 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] float jumpForceGround = 10;
+    enum CharacterEvent
+    {
+        StartMoveLeft,
+        StopMoveLeft,
+
+        StartMoveRight,
+        StopMoveRight,
+
+        StartJump,
+        StopJump
+    }
+
+    [SerializeField] float groundJumpForce = 10;
     [SerializeField] float jumpForceAir = 10;
     [SerializeField] float jumpForceOvertime = 1;
 
     [SerializeField] float wallPushOutForce = 100;
     [SerializeField] float horizontalSpeed = 10;
     [SerializeField] float airHorizontalAcceleration = 100;
-    [SerializeField] float snapThreshold = 0.1f;
 
     [SerializeField] float friction = 0.5f;
 
@@ -27,9 +38,10 @@ public class Player : MonoBehaviour
     Rigidbody2D rb;
 
     bool groundJumped = false;
-    bool isWallJumping = false;
     float initialGravityScale;
     float jumpTimer = 100;
+
+    List<CharacterEvent> playerEvents = new();
 
     private void Start()
     {
@@ -39,13 +51,15 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        UpdateHorizontalSpeed();
-
+        InputHandler();
+    } 
+    private void FixedUpdate()
+    {
+        UpdateHorizontalMovement();
         UpdateJumpLogic();
-
         rb.gravityScale = IsTouchWall() ? initialGravityScale * friction : initialGravityScale;
 
-        // Debug.Log(jumpTimer);
+        playerEvents.Clear();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -56,10 +70,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void UpdateHorizontalSpeed()
+    private void UpdateHorizontalMovement()
     {
-        bool isReceiveMoveInput = !Mathf.Approximately(GetMoveAxis().sqrMagnitude, 0);
-        if (isReceiveMoveInput)
+        if (IsReceiveMovingInput())
         {
             if (IsOnGround())
             {
@@ -73,19 +86,18 @@ public class Player : MonoBehaviour
             }
         }
     }
-
     private void UpdateJumpLogic()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (playerEvents.Contains(CharacterEvent.StartJump))
         {
             if (IsOnGround() || IsTouchWall())
             {
-                rb.AddForce(Vector2.up * jumpForceGround, ForceMode2D.Impulse);
+                rb.AddForce(Vector2.up * groundJumpForce, ForceMode2D.Impulse);
 
                 if(!IsOnGround())
                     rb.AddForce(GetTouchedWallDirection() * wallPushOutForce, ForceMode2D.Impulse);
 
-                Debug.Log("GetTouchedWallDirection" + GetTouchedWallDirection());
+                // Debug.Log("GetTouchedWallDirection" + GetTouchedWallDirection());
 
                 groundJumped = true;
                 jumpTimer = 0;
@@ -99,7 +111,7 @@ public class Player : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (playerEvents.Contains(CharacterEvent.StopJump))
         {
             jumpTimer = 100;
         }
@@ -108,9 +120,13 @@ public class Player : MonoBehaviour
 
         if (isJumping)
         {
-            rb.AddForce(Vector2.up * jumpForceOvertime * Time.deltaTime, ForceMode2D.Impulse);
+            rb.AddForce(Vector2.up * jumpForceOvertime);
             jumpTimer += Time.deltaTime;
         }
+    }
+    private bool IsReceiveMovingInput()
+    {
+        return GetMoveAxis().magnitude > 0.1;
     }
 
     bool IsTouchWall()
@@ -133,11 +149,35 @@ public class Player : MonoBehaviour
 
     Vector2 GetInputAxis()
     {
-        return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        return new Vector2(
+            (Input.GetKey(KeyCode.A) ? -1 : 0) +
+            (Input.GetKey(KeyCode.D) ? 1 : 0),
+            0);
     }
 
     Vector2 GetMoveAxis()
     {
         return new Vector2(GetInputAxis().x, 0);
+    }
+
+    private void InputHandler()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+            playerEvents.Add(CharacterEvent.StartJump);
+
+        if (Input.GetKeyUp(KeyCode.Space))
+            playerEvents.Add(CharacterEvent.StopJump);
+
+        if (Input.GetKeyDown(KeyCode.A))
+            playerEvents.Add(CharacterEvent.StartMoveLeft);
+
+        if (Input.GetKeyUp(KeyCode.A))
+            playerEvents.Add(CharacterEvent.StopMoveLeft);
+
+        if (Input.GetKeyDown(KeyCode.D))
+            playerEvents.Add(CharacterEvent.StartMoveRight);
+
+        if (Input.GetKeyUp(KeyCode.D))
+            playerEvents.Add(CharacterEvent.StopMoveRight);
     }
 }
