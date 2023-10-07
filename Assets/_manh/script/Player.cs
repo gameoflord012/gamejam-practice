@@ -30,6 +30,7 @@ public class Player : MonoBehaviour
     struct PlayerMovementData
     {
         public Vector2 horizontalMovingDirection;
+        public bool startMoving;
 
         public Vector2 GetMoveDirection()
         {
@@ -69,23 +70,20 @@ public class Player : MonoBehaviour
     [SerializeField] float hugWallForce;
     [SerializeField] float wallPushOutForce = 10;
 
-    [Header("Strength Scales")]
-    [Range(0f, 6)]
-    [SerializeField] float tireness = 1;
-    [Range(0f, 5f)]
-    [SerializeField] float groundJumpForceModifier = 1;
-    [Range(0f, 5f)]
-    [SerializeField] float airJumpForceModifier = 1;
-    [Range(0f, 5f)]
-    [SerializeField] float jumpForceOvertimeModifier = 1;
-    [Range(0f, 5f)]
-    [SerializeField] float horizontalSpeedModifier = 1;
-    [Range(0f, 5f)]
-    [SerializeField] float airHorizontalAccelerationModifier = 1;
-    [Range(0f, 5f)]
-    [SerializeField] float hugWallForceModifier = 1;
-    [Range(0f, 5f)]
-    [SerializeField] float wallPushOutForceModifier = 1;
+    [Header("Tireness Scales")]
+    [Range(0f, 10   )] [SerializeField] float tireness = 1;
+    [Space]
+    [Range(0f, 10f  )] [SerializeField] float groundAccelerationModifier = 1;
+    [Range(0f, 5f   )] [SerializeField] float horizontalMaxSpeedModifier = 1;
+    [Range(0f, 10f  )] [SerializeField] float airAccelerationModifier = 1;
+    [Space]
+    [Range(0f, 5f   )] [SerializeField] float airJumpForceModifier = 1;
+    [Range(0f, 5f   )] [SerializeField] float groundJumpForceModifier = 1;
+    [Range(0f, 10f  )] [SerializeField] float jumpForceOvertimeModifier = 1;
+    [Space]
+    [Range(0f, 10f  )] [SerializeField] float hugWallForceModifier = 1;
+    [Range(0f, 5f   )] [SerializeField] float wallPushOutForceModifier = 1;
+  
 
     Rigidbody2D rb;
 
@@ -114,6 +112,7 @@ public class Player : MonoBehaviour
         UpdateHorizontalMovement();
         UpdateJumpLogic();
         UpdateHugWallLogic();
+
         ProcessPlayerEvents();
     }
 
@@ -127,6 +126,8 @@ public class Player : MonoBehaviour
 
     private void ProcessPlayerEvents()
     {
+        movementData.startMoving = false;
+
         while (playerEvents.Count > 0)
         {
             PlayerInputEvent e = playerEvents[0];
@@ -157,6 +158,11 @@ public class Player : MonoBehaviour
                     break;
             }
 
+            if(movementData.IsMoving())
+            {
+                movementData.startMoving = true;
+            }
+
             playerEvents.RemoveAt(0);
         }
     }
@@ -179,8 +185,7 @@ public class Player : MonoBehaviour
 
         if(movementData.IsMoving() && SignOf(GetHugWallDirection().x) != SignOf(movementData.GetMoveAxis()))
         {
-            if( playerEvents.Contains(PlayerInputEvent.StartMoveLeft) ||
-                playerEvents.Contains(PlayerInputEvent.StartMoveRight))
+            if( movementData.startMoving )
             {
                 hugWallReleaseTimer = 0;
                 Debug.Log("============================");
@@ -203,7 +208,7 @@ public class Player : MonoBehaviour
         {
             if (movementData.IsMoving())
             {
-                float acceleration = IsOnGround() ? groundAcceleration : GetAirAcceleration();
+                float acceleration = IsOnGround() ? GetGroundAcceleration() : GetAirAcceleration();
 
                 if (SignOf(rb.velocity.x) != SignOf(movementData.GetMoveAxis()) ||
                        Mathf.Abs(rb.velocity.x) < GetHorizontalSpeed())
@@ -293,7 +298,7 @@ public class Player : MonoBehaviour
 
     float GetHorizontalSpeed()
     {
-        return horizontalMaxSpeed - Mathf.Min(horizontalMaxSpeed, tireness * horizontalSpeedModifier);
+        return horizontalMaxSpeed - Mathf.Min(horizontalMaxSpeed, tireness * horizontalMaxSpeedModifier);
     }
 
     float GetGroundJumpForce()
@@ -308,7 +313,7 @@ public class Player : MonoBehaviour
 
     float GetAirAcceleration()
     {
-        return airAcceleration - Mathf.Min(airAcceleration, tireness * airHorizontalAccelerationModifier);
+        return airAcceleration - Mathf.Min(airAcceleration, tireness * airAccelerationModifier);
     }
 
     float GetAirJumpForce()
@@ -324,6 +329,11 @@ public class Player : MonoBehaviour
     float GetJumpForceOvertime()
     {
         return jumpForceOvertime - Mathf.Min(jumpForceOvertime, tireness * jumpForceOvertimeModifier);
+    }
+
+    float GetGroundAcceleration()
+    {
+        return groundAcceleration - Mathf.Min(groundAcceleration, tireness * groundAccelerationModifier);
     }
 
     int SignOf(float value)

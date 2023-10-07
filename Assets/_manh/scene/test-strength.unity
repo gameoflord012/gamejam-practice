@@ -805,16 +805,32 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 4504195903725879659, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4504195903725879659, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.465
+      value: -0.403
+      objectReference: {fileID: 0}
+    - target: {fileID: 4504195903725879659, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.222
       objectReference: {fileID: 0}
     - target: {fileID: 4728696355926215394, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.076875
       objectReference: {fileID: 0}
     - target: {fileID: 4728696355926215394, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.3875
+      objectReference: {fileID: 0}
+    - target: {fileID: 4728696355926215394, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.391
+      objectReference: {fileID: 0}
+    - target: {fileID: 4728696355926215394, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.229
       objectReference: {fileID: 0}
     - target: {fileID: 4864882908307666740, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -858,7 +874,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: tireness
-      value: 0
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: acceleration
@@ -870,7 +886,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: hugWallForce
-      value: 37.8
+      value: 60.1
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: jumpForceAir
@@ -901,12 +917,36 @@ PrefabInstance:
       value: 123.46
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: airJumpForceModifier
+      value: 0.77
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: hugWallForceModifier
+      value: 5.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: hugWallReleaseDuration
-      value: 1.5
+      value: 0.29
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: groundJumpForceModifier
+      value: 0.77
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: airHorizontalAcceleration
       value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: jumpForceOvertimeModifier
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: groundAccelerationModifier
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: horizontalMaxSpeedModifier
+      value: 0.85
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
