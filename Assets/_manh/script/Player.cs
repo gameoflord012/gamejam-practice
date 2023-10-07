@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -34,10 +35,9 @@ public class Player : MonoBehaviour
     [SerializeField] ColliderFilter leftWallDetector;
     [SerializeField] ColliderFilter rightWallDetector;
 
-    [Header("Others")]
-    [SerializeField] float wallPushOutForce = 100;
-    [Range(1f, 50f)]
-    [SerializeField] float wallFriction = 10f;
+    [Header("Wall")]
+    [SerializeField] float hugWallForce;
+    [SerializeField] float wallPushOutForce = 10;
 
     [Header("Strength Scales")]
     [Range(0f, 6)]
@@ -53,14 +53,13 @@ public class Player : MonoBehaviour
     [Range(0f, 5f)]
     [SerializeField] float airHorizontalAccelerationModifier = 1;
     [Range(0f, 5f)]
-    [SerializeField] float wallFrictionModifier = 1;
+    [SerializeField] float hugWallForceModifier = 1;
     [Range(0f, 5f)]
     [SerializeField] float wallPushOutForceModifier = 1;
 
     Rigidbody2D rb;
 
     bool groundJumped = false;
-    float initialGravityScale;
     float jumpTimer = 100;
 
     List<CharacterEvent> playerEvents = new();
@@ -75,9 +74,9 @@ public class Player : MonoBehaviour
         return groundJumpForce - Mathf.Min(groundJumpForce, tireness * groundJumpForceModifier);
     }
 
-    float GetWallFriction()
+    float GetHugWallForce()
     {
-        return wallFriction - Mathf.Min(wallFriction, tireness * wallFrictionModifier);
+        return hugWallForce - Mathf.Min(hugWallForce, tireness * hugWallForceModifier);
     }
 
     float GetAirHorizontalAcceleration()
@@ -103,7 +102,6 @@ public class Player : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        initialGravityScale = rb.gravityScale;
     }
 
     private void Update()
@@ -114,9 +112,16 @@ public class Player : MonoBehaviour
     {
         UpdateHorizontalMovement();
         UpdateJumpLogic();
-        rb.gravityScale = IsTouchWall() ? Mathf.Max(0, initialGravityScale - GetWallFriction()) : initialGravityScale;
-
+        UpdateHugWallLogic();
         playerEvents.Clear();
+    }
+
+    private void UpdateHugWallLogic()
+    {
+        if(IsTouchWall() && rb.velocity.y < 0)
+        {
+            rb.AddForce(Vector2.up * GetHugWallForce());
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
