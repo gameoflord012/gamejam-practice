@@ -598,6 +598,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 1497355296}
     m_Modifications:
     - target: {fileID: 8023618812423184428, guid: 0b977914a1668fd4a9b289971ee1befa, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 604.83246
+      objectReference: {fileID: 0}
+    - target: {fileID: 8023618812423184428, guid: 0b977914a1668fd4a9b289971ee1befa, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.1649437
       objectReference: {fileID: 0}
@@ -801,20 +805,16 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 4504195903725879659, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.103125
-      objectReference: {fileID: 0}
-    - target: {fileID: 4504195903725879659, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.32
+      value: -0.465
       objectReference: {fileID: 0}
     - target: {fileID: 4728696355926215394, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.09609375
+      value: 0.076875
       objectReference: {fileID: 0}
     - target: {fileID: 4728696355926215394, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.367
+      value: 0.391
       objectReference: {fileID: 0}
     - target: {fileID: 4864882908307666740, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -861,6 +861,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: acceleration
+      value: 78.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: airJumpForce
       value: 15.1
       objectReference: {fileID: 0}
@@ -891,6 +895,14 @@ PrefabInstance:
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: jumpForceOvertime
       value: 55
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: groundAcceleration
+      value: 123.46
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: hugWallReleaseDuration
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: airHorizontalAcceleration

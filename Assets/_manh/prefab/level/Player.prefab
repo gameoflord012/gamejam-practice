@@ -219,16 +219,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   groundJumpForce: 17.4
-  jumpForceAir: 14.7
+  airJumpForce: 10
   jumpForceOvertime: 65.7
-  wallPushOutForce: 8
-  horizontalSpeed: 6
-  airHorizontalAcceleration: 46.5
-  friction: 0.5
+  jumpDuration: 0.3
+  groundAcceleration: 10
+  horizontalMaxSpeed: 10
+  airAcceleration: 100
   groundDetector: {fileID: 7406948701538875268}
   leftWallDetector: {fileID: 8162145895047896780}
   rightWallDetector: {fileID: 1033697563520095557}
-  jumpDuration: 0.3
+  hugWallReleaseDuration: 0.3
+  hugWallForce: 0
+  wallPushOutForce: 8
+  tireness: 1
+  groundJumpForceModifier: 1
+  airJumpForceModifier: 1
+  jumpForceOvertimeModifier: 1
+  horizontalSpeedModifier: 1
+  airHorizontalAccelerationModifier: 1
+  hugWallForceModifier: 1
+  wallPushOutForceModifier: 1
 --- !u!1001 &2325853633095542868
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -247,7 +257,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.3
+      value: 0.333
       objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.y
@@ -328,7 +338,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.28
+      value: -0.349
       objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.y

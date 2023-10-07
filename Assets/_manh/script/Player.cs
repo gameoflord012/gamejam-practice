@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    enum CharacterEvent
+    enum PlayerInputEvent
     {
         StartMoveLeft,
         StopMoveLeft,
@@ -19,6 +20,33 @@ public class Player : MonoBehaviour
         StopJump
     }
 
+    enum PlayerState
+    {
+        OnGround,
+        HugWall,
+        OnAir
+    }
+
+    struct PlayerMovementData
+    {
+        public Vector2 horizontalMovingDirection;
+
+        public Vector2 GetMoveDirection()
+        {
+            return horizontalMovingDirection.normalized;
+        }
+
+        public float GetMoveAxis()
+        {
+            return horizontalMovingDirection.x;
+        }
+
+        public bool IsMoving()
+        {
+            return horizontalMovingDirection.magnitude > 0.1;
+        }
+    }
+
     [Header("Jump")]
     [SerializeField] float groundJumpForce = 10;
     [SerializeField] float airJumpForce = 10;
@@ -26,9 +54,9 @@ public class Player : MonoBehaviour
     [SerializeField] float jumpDuration = 0.3f;
 
     [Header("Moving")]
-    [SerializeField] float acceleration = 10;
-    [SerializeField] float horizontalSpeed = 10;
-    [SerializeField] float airHorizontalAcceleration = 100;
+    [SerializeField] float groundAcceleration = 10;
+    [SerializeField] float horizontalMaxSpeed = 10;
+    [SerializeField] float airAcceleration = 100;
 
 
     [Header("Detector")]
@@ -37,6 +65,7 @@ public class Player : MonoBehaviour
     [SerializeField] ColliderFilter rightWallDetector;
 
     [Header("Wall")]
+    [SerializeField] float hugWallReleaseDuration = 0.3f;
     [SerializeField] float hugWallForce;
     [SerializeField] float wallPushOutForce = 10;
 
@@ -61,9 +90,14 @@ public class Player : MonoBehaviour
     Rigidbody2D rb;
 
     bool groundJumped = false;
-    float jumpTimer = 100;
 
-    List<CharacterEvent> playerEvents = new();
+    float jumpTimer = 100;
+    float hugWallReleaseTimer = 100;
+
+    List<PlayerInputEvent> playerEvents = new();
+    PlayerState currentPlayerState;
+    PlayerMovementData movementData;
+
 
     private void Start()
     {
@@ -76,56 +110,119 @@ public class Player : MonoBehaviour
     } 
     private void FixedUpdate()
     {
+        UpdateCheckPlayerState();
         UpdateHorizontalMovement();
         UpdateJumpLogic();
         UpdateHugWallLogic();
-        playerEvents.Clear();
-    }
-
-    private void UpdateHugWallLogic()
-    {
-        if(IsTouchWall() && rb.velocity.y < 0)
-        {
-            rb.AddForce(Vector2.up * GetHugWallForce());
-        }
+        ProcessPlayerEvents();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.gameObject.CompareTag("obstacle"))
+        if (collision.gameObject.CompareTag("obstacle"))
         {
             gameObject.SetActive(false);
         }
     }
 
+    private void ProcessPlayerEvents()
+    {
+        while (playerEvents.Count > 0)
+        {
+            PlayerInputEvent e = playerEvents[0];
+
+            switch (e)
+            {
+                case PlayerInputEvent.StartMoveLeft:
+                    movementData.horizontalMovingDirection += Vector2.left;
+
+                    break;
+                case PlayerInputEvent.StopMoveLeft:
+                    movementData.horizontalMovingDirection -= Vector2.left;
+
+                    break;
+                case PlayerInputEvent.StartMoveRight:
+                    movementData.horizontalMovingDirection += Vector2.right;
+
+                    break;
+                case PlayerInputEvent.StopMoveRight:
+                    movementData.horizontalMovingDirection -= Vector2.right;
+
+                    break;
+                case PlayerInputEvent.StartJump:
+                    break;
+                case PlayerInputEvent.StopJump:
+                    break;
+                default:
+                    break;
+            }
+
+            playerEvents.RemoveAt(0);
+        }
+    }
+
+    private void UpdateCheckPlayerState()
+    {
+        if (IsOnGround()) currentPlayerState = PlayerState.OnGround;
+        else if (IsHugWall()) currentPlayerState = PlayerState.HugWall;
+        else currentPlayerState = PlayerState.OnAir;
+    }
+
+    private void UpdateHugWallLogic()
+    {
+        if (currentPlayerState != PlayerState.HugWall) return;
+
+        if(rb.velocity.y < 0)
+        {
+            rb.AddForce(Vector2.up * GetHugWallForce());
+        }
+
+        if(movementData.IsMoving() && SignOf(GetHugWallDirection().x) != SignOf(movementData.GetMoveAxis()))
+        {
+            if( playerEvents.Contains(PlayerInputEvent.StartMoveLeft) ||
+                playerEvents.Contains(PlayerInputEvent.StartMoveRight))
+            {
+                hugWallReleaseTimer = 0;
+                Debug.Log("============================");
+            }
+
+            Debug.Log(hugWallReleaseTimer);
+
+            if (hugWallReleaseTimer > hugWallReleaseDuration)
+            {
+                 rb.AddForce(movementData.GetMoveDirection() * GetAirAcceleration());
+            }
+        }
+
+        hugWallReleaseTimer += Time.deltaTime;
+    }
+
     private void UpdateHorizontalMovement()
     {
-        if (IsReceiveMovingInput())
+        if(currentPlayerState == PlayerState.OnAir || currentPlayerState == PlayerState.OnGround)
         {
-            if (IsOnGround())
+            if (movementData.IsMoving())
             {
-                if(Mathf.Abs(rb.velocity.x - GetHorizontalSpeed()) > GetHorizontalSpeed() || 
-                   Mathf.Abs(rb.velocity.x) < GetHorizontalSpeed())
+                float acceleration = IsOnGround() ? groundAcceleration : GetAirAcceleration();
+
+                if (SignOf(rb.velocity.x) != SignOf(movementData.GetMoveAxis()) ||
+                       Mathf.Abs(rb.velocity.x) < GetHorizontalSpeed())
                 {
-                    rb.AddForce(GetMoveAxis() * acceleration);
+                    rb.AddForce(movementData.GetMoveDirection() * acceleration);
                 }
-            }
-            else
-            {
-                rb.AddForce(GetMoveAxis() * GetAirHorizontalAcceleration());
             }
         }
     }
     private void UpdateJumpLogic()
     {
-        if (playerEvents.Contains(CharacterEvent.StartJump))
+        if (playerEvents.Contains(PlayerInputEvent.StartJump))
         {
-            if (IsOnGround() || IsTouchWall())
+            if (currentPlayerState == PlayerState.HugWall || currentPlayerState == PlayerState.OnGround)
             {
                 rb.AddForce(Vector2.up * GetGroundJumpForce(), ForceMode2D.Impulse);
 
-                if(!IsOnGround())
-                    rb.AddForce(GetTouchedWallDirection() * GetWallPushOutForce(), ForceMode2D.Impulse);
+                if(currentPlayerState == PlayerState.HugWall)
+                    rb.AddForce(-GetHugWallDirection() * GetWallPushOutForce(), ForceMode2D.Impulse);
 
                 // Debug.Log("GetTouchedWallDirection" + GetTouchedWallDirection());
 
@@ -141,7 +238,7 @@ public class Player : MonoBehaviour
             }
         }
 
-        if (playerEvents.Contains(CharacterEvent.StopJump))
+        if (playerEvents.Contains(PlayerInputEvent.StopJump))
         {
             jumpTimer = 100;
         }
@@ -154,12 +251,8 @@ public class Player : MonoBehaviour
             jumpTimer += Time.deltaTime;
         }
     }
-    private bool IsReceiveMovingInput()
-    {
-        return GetMoveAxis().magnitude > 0.1;
-    }
-
-    bool IsTouchWall()
+    
+    bool IsHugWall()
     {
         return leftWallDetector.GetTouchCols().Count > 0 || rightWallDetector.GetTouchCols().Count > 0;
     }
@@ -169,7 +262,7 @@ public class Player : MonoBehaviour
         return groundDetector.GetTouchCols().Count > 0;
     }
 
-    Vector2 GetTouchedWallDirection()
+    Vector2 GetHugWallDirection()
     {
         if (leftWallDetector.GetTouchCols().Count > 0) return Vector2.left;
         if (rightWallDetector.GetTouchCols().Count > 0) return Vector2.right;
@@ -177,43 +270,30 @@ public class Player : MonoBehaviour
         return Vector2.zero;
     }
 
-    Vector2 GetInputAxis()
-    {
-        return new Vector2(
-            (Input.GetKey(KeyCode.A) ? -1 : 0) +
-            (Input.GetKey(KeyCode.D) ? 1 : 0),
-            0);
-    }
-
-    Vector2 GetMoveAxis()
-    {
-        return new Vector2(GetInputAxis().x, 0);
-    }
-
     private void InputHandler()
     {
         if (Input.GetKeyDown(KeyCode.Space))
-            playerEvents.Add(CharacterEvent.StartJump);
+            playerEvents.Add(PlayerInputEvent.StartJump);
 
         if (Input.GetKeyUp(KeyCode.Space))
-            playerEvents.Add(CharacterEvent.StopJump);
+            playerEvents.Add(PlayerInputEvent.StopJump);
 
         if (Input.GetKeyDown(KeyCode.A))
-            playerEvents.Add(CharacterEvent.StartMoveLeft);
+            playerEvents.Add(PlayerInputEvent.StartMoveLeft);
 
         if (Input.GetKeyUp(KeyCode.A))
-            playerEvents.Add(CharacterEvent.StopMoveLeft);
+            playerEvents.Add(PlayerInputEvent.StopMoveLeft);
 
         if (Input.GetKeyDown(KeyCode.D))
-            playerEvents.Add(CharacterEvent.StartMoveRight);
+            playerEvents.Add(PlayerInputEvent.StartMoveRight);
 
         if (Input.GetKeyUp(KeyCode.D))
-            playerEvents.Add(CharacterEvent.StopMoveRight);
+            playerEvents.Add(PlayerInputEvent.StopMoveRight);
     }
 
     float GetHorizontalSpeed()
     {
-        return horizontalSpeed - Mathf.Min(horizontalSpeed, tireness * horizontalSpeedModifier);
+        return horizontalMaxSpeed - Mathf.Min(horizontalMaxSpeed, tireness * horizontalSpeedModifier);
     }
 
     float GetGroundJumpForce()
@@ -226,9 +306,9 @@ public class Player : MonoBehaviour
         return hugWallForce - Mathf.Min(hugWallForce, tireness * hugWallForceModifier);
     }
 
-    float GetAirHorizontalAcceleration()
+    float GetAirAcceleration()
     {
-        return airHorizontalAcceleration - Mathf.Min(airHorizontalAcceleration, tireness * airHorizontalAccelerationModifier);
+        return airAcceleration - Mathf.Min(airAcceleration, tireness * airHorizontalAccelerationModifier);
     }
 
     float GetAirJumpForce()
@@ -244,5 +324,10 @@ public class Player : MonoBehaviour
     float GetJumpForceOvertime()
     {
         return jumpForceOvertime - Mathf.Min(jumpForceOvertime, tireness * jumpForceOvertimeModifier);
+    }
+
+    int SignOf(float value)
+    {
+        return value > 0 ? 1 : value < 0 ? -1 : 0;
     }
 }
