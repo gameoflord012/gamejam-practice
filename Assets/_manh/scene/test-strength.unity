@@ -861,8 +861,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: airJumpForce
+      value: 15.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: hugWallForce
-      value: 49.11
+      value: 37.8
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: jumpForceAir
@@ -878,7 +882,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: groundJumpForce
-      value: 10
+      value: 15.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
+      propertyPath: horizontalSpeed
+      value: 9.27
       objectReference: {fileID: 0}
     - target: {fileID: 5071161780561238186, guid: 79b55157a30d3634ba247c6b587aafd3, type: 3}
       propertyPath: jumpForceOvertime

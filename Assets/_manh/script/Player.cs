@@ -26,6 +26,7 @@ public class Player : MonoBehaviour
     [SerializeField] float jumpDuration = 0.3f;
 
     [Header("Moving")]
+    [SerializeField] float acceleration = 10;
     [SerializeField] float horizontalSpeed = 10;
     [SerializeField] float airHorizontalAcceleration = 100;
 
@@ -63,41 +64,6 @@ public class Player : MonoBehaviour
     float jumpTimer = 100;
 
     List<CharacterEvent> playerEvents = new();
-
-    float GetHorizontalSpeed()
-    {
-        return horizontalSpeed - Mathf.Min(horizontalSpeed, tireness * horizontalSpeedModifier);
-    }
-
-    float GetGroundJumpForce()
-    {
-        return groundJumpForce - Mathf.Min(groundJumpForce, tireness * groundJumpForceModifier);
-    }
-
-    float GetHugWallForce()
-    {
-        return hugWallForce - Mathf.Min(hugWallForce, tireness * hugWallForceModifier);
-    }
-
-    float GetAirHorizontalAcceleration()
-    {
-        return airHorizontalAcceleration - Mathf.Min(airHorizontalAcceleration, tireness * airHorizontalAccelerationModifier);
-    }
-
-    float GetAirJumpForce()
-    {
-        return airJumpForce - Mathf.Min(airJumpForce, tireness * airJumpForceModifier);
-    }
-
-    float GetWallPushOutForce()
-    {
-        return wallPushOutForce - Mathf.Min(wallPushOutForce, tireness * wallPushOutForceModifier);
-    }
-
-    float GetJumpForceOvertime()
-    {
-        return jumpForceOvertime - Mathf.Min(jumpForceOvertime, tireness * jumpForceOvertimeModifier);
-    }
 
     private void Start()
     {
@@ -138,9 +104,11 @@ public class Player : MonoBehaviour
         {
             if (IsOnGround())
             {
-                rb.velocity = new Vector2(
-                    GetMoveAxis().x * GetHorizontalSpeed(),
-                    rb.velocity.y);
+                if(Mathf.Abs(rb.velocity.x - GetHorizontalSpeed()) > GetHorizontalSpeed() || 
+                   Mathf.Abs(rb.velocity.x) < GetHorizontalSpeed())
+                {
+                    rb.AddForce(GetMoveAxis() * acceleration);
+                }
             }
             else
             {
@@ -241,5 +209,40 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.D))
             playerEvents.Add(CharacterEvent.StopMoveRight);
+    }
+
+    float GetHorizontalSpeed()
+    {
+        return horizontalSpeed - Mathf.Min(horizontalSpeed, tireness * horizontalSpeedModifier);
+    }
+
+    float GetGroundJumpForce()
+    {
+        return groundJumpForce - Mathf.Min(groundJumpForce, tireness * groundJumpForceModifier);
+    }
+
+    float GetHugWallForce()
+    {
+        return hugWallForce - Mathf.Min(hugWallForce, tireness * hugWallForceModifier);
+    }
+
+    float GetAirHorizontalAcceleration()
+    {
+        return airHorizontalAcceleration - Mathf.Min(airHorizontalAcceleration, tireness * airHorizontalAccelerationModifier);
+    }
+
+    float GetAirJumpForce()
+    {
+        return airJumpForce - Mathf.Min(airJumpForce, tireness * airJumpForceModifier);
+    }
+
+    float GetWallPushOutForce()
+    {
+        return wallPushOutForce - Mathf.Min(wallPushOutForce, tireness * wallPushOutForceModifier);
+    }
+
+    float GetJumpForceOvertime()
+    {
+        return jumpForceOvertime - Mathf.Min(jumpForceOvertime, tireness * jumpForceOvertimeModifier);
     }
 }
