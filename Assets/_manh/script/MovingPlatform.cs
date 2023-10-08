@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
 {
+    [SerializeField] Rigidbody2D rb;
+
     [SerializeField] Transform transformA;
     [SerializeField] Transform transformB;
 
@@ -31,7 +33,7 @@ public class MovingPlatform : MonoBehaviour
 
         Vector2 nextWaypoint = positions[(currentIndex + 1) % 2];
 
-        transform.position = Vector2.Lerp(positions[currentIndex], nextWaypoint, travelTimer / travelDuration);
+        rb.velocity = (nextWaypoint - positions[currentIndex]) / travelDuration; 
 
         travelTimer += Time.deltaTime;
     }

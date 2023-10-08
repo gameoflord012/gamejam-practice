@@ -67,7 +67,7 @@ public class Player : MonoBehaviour
 
     [Header("Wall")]
     [SerializeField] float hugWallReleaseDuration = 0.3f;
-    [SerializeField] float hugWallForce;
+    [SerializeField] float slideDownGravity = 0.3f;
     [SerializeField] float wallPushOutForce = 10;
 
     [Header("Tireness Scales")]
@@ -81,7 +81,7 @@ public class Player : MonoBehaviour
     [Range(0f, 5f   )] [SerializeField] float groundJumpForceModifier = 1;
     [Range(0f, 10f  )] [SerializeField] float jumpForceOvertimeModifier = 1;
     [Space]
-    [Range(0f, 10f  )] [SerializeField] float hugWallForceModifier = 1;
+    [Range(0f, 10f  )] [SerializeField] float slideDownSpeedModifier = 1;
     [Range(0f, 5f   )] [SerializeField] float wallPushOutForceModifier = 1;
   
 
@@ -91,6 +91,7 @@ public class Player : MonoBehaviour
 
     float jumpTimer = 100;
     float hugWallReleaseTimer = 100;
+    float initialGravityScale;
 
     List<PlayerInputEvent> playerEvents = new();
     PlayerState currentPlayerState;
@@ -100,6 +101,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        initialGravityScale = rb.gravityScale;
     }
 
     private void Update()
@@ -112,6 +114,8 @@ public class Player : MonoBehaviour
         UpdateHorizontalMovement();
         UpdateJumpLogic();
         UpdateHugWallLogic();
+
+        //Debug.Log(currentPlayerState.ToString());
 
         ProcessPlayerEvents();
     }
@@ -176,14 +180,13 @@ public class Player : MonoBehaviour
 
     private void UpdateHugWallLogic()
     {
+        rb.gravityScale = initialGravityScale;
+
         if (currentPlayerState != PlayerState.HugWall) return;
 
-        if(rb.velocity.y < 0)
-        {
-            rb.AddForce(Vector2.up * GetHugWallForce());
-        }
+        rb.gravityScale = GetSlideDownGravity();
 
-        if(movementData.IsMoving() && SignOf(GetHugWallDirection().x) != SignOf(movementData.GetMoveAxis()))
+        if (movementData.IsMoving() && SignOf(GetHugWallDirection().x) != SignOf(movementData.GetMoveAxis()))
         {
             if( movementData.startMoving )
             {
@@ -250,7 +253,7 @@ public class Player : MonoBehaviour
 
         bool isJumping = jumpTimer < jumpDuration;
 
-        if (isJumping)
+        if (isJumping && currentPlayerState == PlayerState.OnAir)
         {
             rb.AddForce(Vector2.up * GetJumpForceOvertime());
             jumpTimer += Time.deltaTime;
@@ -306,9 +309,9 @@ public class Player : MonoBehaviour
         return groundJumpForce - Mathf.Min(groundJumpForce, tireness * groundJumpForceModifier);
     }
 
-    float GetHugWallForce()
+    float GetSlideDownGravity()
     {
-        return hugWallForce - Mathf.Min(hugWallForce, tireness * hugWallForceModifier);
+        return slideDownGravity - Mathf.Min(slideDownGravity, tireness * slideDownSpeedModifier);
     }
 
     float GetAirAcceleration()
