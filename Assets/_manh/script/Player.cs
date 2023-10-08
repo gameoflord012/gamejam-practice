@@ -55,6 +55,7 @@ public class Player : MonoBehaviour
     [SerializeField] float jumpDuration = 0.3f;
 
     [Header("Moving")]
+    [SerializeField] float horizontalDrag = 10;
     [SerializeField] float groundAcceleration = 10;
     [SerializeField] float horizontalMaxSpeed = 10;
     [SerializeField] float airAcceleration = 100;
@@ -209,18 +210,20 @@ public class Player : MonoBehaviour
     {
         if(currentPlayerState == PlayerState.OnAir || currentPlayerState == PlayerState.OnGround)
         {
-            if (movementData.IsMoving())
-            {
-                float acceleration = IsOnGround() ? GetGroundAcceleration() : GetAirAcceleration();
-
-                if (SignOf(rb.velocity.x) != SignOf(movementData.GetMoveAxis()) ||
-                       Mathf.Abs(rb.velocity.x) < GetHorizontalSpeed())
-                {
-                    rb.AddForce(movementData.GetMoveDirection() * acceleration);
-                }
-            }
+            float acceleration = IsOnGround() ? GetGroundAcceleration() : GetAirAcceleration();
+            rb.AddForce(movementData.GetMoveDirection() * acceleration);
         }
+
+        ApplyHorizontalDrag();
     }
+
+    private void ApplyHorizontalDrag()
+    {
+        float dragMagnitude = (rb.velocity.x * rb.velocity.x * horizontalDrag);
+        Vector2 dragForce = Vector2.right * -SignOf(rb.velocity.x) * dragMagnitude;
+        rb.AddForce(dragForce);
+    }
+
     private void UpdateJumpLogic()
     {
         if (playerEvents.Contains(PlayerInputEvent.StartJump))

@@ -43,3 +43,21 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: background
+    uniqueID: 918802511
+    locked: 0
+  - name: elements
+    uniqueID: 4082370583
+    locked: 0
+  - name: grass
+    uniqueID: 1759619713
+    locked: 0
+  - name: ground
+    uniqueID: 3933688547
+    locked: 0
+  - name: shadow environment
+    uniqueID: 3618455901
+    locked: 0
+  - name: light
+    uniqueID: 986952463
+    locked: 0
