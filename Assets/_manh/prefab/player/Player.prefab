@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6504234849642268135}
   m_Layer: 0
   m_Name: model
-  m_TagString: Untagged
+  m_TagString: player-collision
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -221,28 +221,27 @@ MonoBehaviour:
   groundDetector: {fileID: 7406948701538875268}
   leftWallDetector: {fileID: 8162145895047896780}
   rightWallDetector: {fileID: 1033697563520095557}
-  groundJumpVelocity: 7.17
-  airJumpVelocity: 5
-  jumpForceOvertime: 10
+  groundJumpVelocity: 5.73
+  airJumpVelocity: 5.5
+  jumpForceOvertime: 53.2
   jumpDuration: 0.16
-  groundAcceleration: 45
-  airAcceleration: 1
-  hugWallReleaseDuration: 0.11
-  wallPushOutForce: 5.7
-  wallPushUpVelocity: 0
-  groundFriction: 0.747
-  airDrag: 0.768
-  wallSlideFriction: 1
+  groundAcceleration: 50
+  airAcceleration: 40.7
+  hugWallReleaseDuration: 0.29
+  wallPushOutVelocity: 14
+  wallPushUpVelocity: 9.4
+  groundDrag: 0.1
+  horizontalAirDrag: 0.165
+  wallSlideDrag: 0.545
   tireness: 0
-  groundAccelerationModifier: 1
-  airAccelerationModifier: 1
-  horizontalFrictionModifier: 0
-  groundJumpVelocityModifier: 1
-  airJumpVelocityModifier: 1
-  jumpForceOvertimeModifier: 1
-  wallSlideFrictionModifier: 0
-  wallPushOutForceModifier: 1
-  wallPushUpForceModifier: 0
+  groundAccelerationModifier: 2.5
+  airAccelerationModifier: 2.39
+  groundJumpVelocityModifier: 0.28
+  airJumpVelocityModifier: 0.28
+  jumpForceOvertimeModifier: 2
+  wallSlideDragModifier: 0.1
+  wallPushOutVelocityModifier: 1
+  wallPushUpVelocityModifier: 0.75
 --- !u!1001 &2325853633095542868
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -251,25 +250,13 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7179241779871971338}
     m_Modifications:
-    - target: {fileID: 3323509171096878353, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
-      propertyPath: filterLayers.m_Bits
-      value: 16777216
-      objectReference: {fileID: 0}
-    - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.045
-      objectReference: {fileID: 0}
-    - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.4240625
-      objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.384
+      value: 0.391
       objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.178
+      value: -0.229
       objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.z
@@ -336,25 +323,13 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7179241779871971338}
     m_Modifications:
-    - target: {fileID: 3323509171096878353, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
-      propertyPath: filterLayers.m_Bits
-      value: 16777216
-      objectReference: {fileID: 0}
-    - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.0625
-      objectReference: {fileID: 0}
-    - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.359375
-      objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.361
+      value: -0.403
       objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.179
+      value: -0.222
       objectReference: {fileID: 0}
     - target: {fileID: 7050565288548147894, guid: 06d35c92c685a834a9bf192214a37b78, type: 3}
       propertyPath: m_LocalPosition.z
@@ -421,21 +396,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7179241779871971338}
     m_Modifications:
-    - target: {fileID: 2071833637150580157, guid: 9653870edff78ac46aa79db9e2d3dc70, type: 3}
-      propertyPath: filterLayers.m_Bits
-      value: 8388608
-      objectReference: {fileID: 0}
     - target: {fileID: 4919399607392401908, guid: 9653870edff78ac46aa79db9e2d3dc70, type: 3}
       propertyPath: m_Name
       value: ground-detector
-      objectReference: {fileID: 0}
-    - target: {fileID: 5982886464624984602, guid: 9653870edff78ac46aa79db9e2d3dc70, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.3584375
-      objectReference: {fileID: 0}
-    - target: {fileID: 5982886464624984602, guid: 9653870edff78ac46aa79db9e2d3dc70, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.049999
       objectReference: {fileID: 0}
     - target: {fileID: 5982886464624984602, guid: 9653870edff78ac46aa79db9e2d3dc70, type: 3}
       propertyPath: m_LocalPosition.x

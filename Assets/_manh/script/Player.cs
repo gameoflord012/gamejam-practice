@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
         AirAcceleration,
 
         WallSlideDrag,
-        WallPushOutForce,
+        WallPushOutVelocity,
         WallPushUpVelocity
     }
 
@@ -80,7 +80,7 @@ public class Player : MonoBehaviour
     
     [Header("Wall")]
     [SerializeField] float hugWallReleaseDuration = 0.3f;
-    [SerializeField] float wallPushOutForce = 10;
+    [SerializeField] float wallPushOutVelocity = 10;
     [SerializeField] float wallPushUpVelocity = 10;
 
     [Header("Friction")]
@@ -99,13 +99,13 @@ public class Player : MonoBehaviour
     [Range(0f, 10f  )] [SerializeField] float jumpForceOvertimeModifier = 1;
     [Space]
     [Range(0f, 10f  )] [SerializeField] float wallSlideDragModifier;
-    [Range(0f, 5f   )] [SerializeField] float wallPushOutForceModifier = 1;
+    [Range(0f, 5f   )] [SerializeField] float wallPushOutVelocityModifier = 1;
     [Range(0f, 10f  )] [SerializeField] float wallPushUpVelocityModifier;
 
 
     Rigidbody2D rb;
 
-    bool groundJumped = false;
+    bool canAirJump = false;
 
     float jumpTimer = 100;
     float hugWallReleaseTimer = 100;
@@ -114,6 +114,11 @@ public class Player : MonoBehaviour
     List<PlayerInputEvent> playerEvents = new();
     PlayerState currentPlayerState;
     PlayerMovementData movementData;
+
+    public void AddToTireness(float addAmount)
+    {
+        tireness = Mathf.Min(tireness + addAmount, 10);
+    }
 
     private void Start()
     {
@@ -252,19 +257,19 @@ public class Player : MonoBehaviour
     {
         if (playerEvents.Contains(PlayerInputEvent.StartJump))
         {
-            if (currentPlayerState == PlayerState.HugWall || currentPlayerState == PlayerState.OnGround)
+            if(currentPlayerState == PlayerState.OnGround)
             {
-                if(currentPlayerState == PlayerState.HugWall)
-                {
-                    ApplyWallForces();
-                }
-
-                groundJumped = true;
+                canAirJump = true;
                 jumpTimer = 0;
             }
-            else if (groundJumped)
+            else if (currentPlayerState == PlayerState.HugWall)
             {
-                groundJumped = false;
+                ApplyWallJumpVelocity();
+                canAirJump = true;
+            }
+            else if (canAirJump)
+            {
+                canAirJump = false;
                 jumpTimer = 0;
             }
         }
@@ -279,17 +284,18 @@ public class Player : MonoBehaviour
         if (isJumping)
         {
             rb.velocity = new Vector2(
-                rb.velocity.x, GetStat(groundJumped ?
-                PlayerStat.GroundJumpVelocity : PlayerStat.AirJumpVelocity));
+                rb.velocity.x, 
+                GetStat(canAirJump ? PlayerStat.GroundJumpVelocity : PlayerStat.AirJumpVelocity));
 
             jumpTimer += Time.deltaTime;
         }
     }
 
-    private void ApplyWallForces()
+    private void ApplyWallJumpVelocity()
     {
-        rb.AddForce(-GetHugWallDirection() * GetStat(PlayerStat.WallPushOutForce), ForceMode2D.Impulse);
-        rb.velocity = new Vector2(rb.velocity.x, GetStat(PlayerStat.WallPushUpVelocity));
+        rb.velocity = new Vector2(
+            GetStat(PlayerStat.WallPushOutVelocity) * -GetHugWallDirection().x,
+            GetStat(PlayerStat.WallPushUpVelocity));
     }
 
     bool IsHugWall()
@@ -367,9 +373,9 @@ public class Player : MonoBehaviour
                 modifier =  wallSlideDragModifier;
 
                 break;
-            case PlayerStat.WallPushOutForce:
-                baseStat =  wallPushOutForce;
-                modifier =  wallPushOutForceModifier;
+            case PlayerStat.WallPushOutVelocity:
+                baseStat =  wallPushOutVelocity;
+                modifier =  wallPushOutVelocityModifier;
 
                 break;
             case PlayerStat.WallPushUpVelocity:

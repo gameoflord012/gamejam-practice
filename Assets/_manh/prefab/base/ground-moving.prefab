@@ -72,7 +72,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6329264271759435722}
   - component: {fileID: 8526818619699254089}
-  m_Layer: 23
+  m_Layer: 0
   m_Name: model
   m_TagString: Untagged
   m_Icon: {fileID: 0}

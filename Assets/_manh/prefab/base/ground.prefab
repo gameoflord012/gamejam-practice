@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5363725239545658749}
   m_Layer: 24
   m_Name: solid
-  m_TagString: Untagged
+  m_TagString: wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -206,7 +206,7 @@ GameObject:
   - component: {fileID: 2365406708463002256}
   m_Layer: 23
   m_Name: surface
-  m_TagString: Untagged
+  m_TagString: ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
