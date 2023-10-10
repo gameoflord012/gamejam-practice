@@ -131,9 +131,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: -212596713
+  m_SortingLayer: 2
+  m_SortingOrder: 120
   m_Sprite: {fileID: 523471092, guid: 83c602444d45d8044afa750d1e972b61, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -192,9 +192,9 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 7
+  m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 6
+  m_GravityScale: 4
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -218,28 +218,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb8a6e9a0f13d804db0245fd23e9cf3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groundJumpForce: 17.4
-  airJumpForce: 10
-  jumpForceOvertime: 65.7
-  jumpDuration: 0.3
-  groundAcceleration: 10
-  horizontalMaxSpeed: 10
-  airAcceleration: 100
   groundDetector: {fileID: 7406948701538875268}
   leftWallDetector: {fileID: 8162145895047896780}
   rightWallDetector: {fileID: 1033697563520095557}
-  hugWallReleaseDuration: 0.3
-  slideDownSpeed: 0.3
-  wallPushOutForce: 8
-  tireness: 1
+  groundJumpVelocity: 7.17
+  airJumpVelocity: 5
+  jumpForceOvertime: 10
+  jumpDuration: 0.16
+  groundAcceleration: 45
+  airAcceleration: 1
+  hugWallReleaseDuration: 0.11
+  wallPushOutForce: 5.7
+  wallPushUpVelocity: 0
+  groundFriction: 0.747
+  airDrag: 0.768
+  wallSlideFriction: 1
+  tireness: 0
   groundAccelerationModifier: 1
-  horizontalMaxSpeedModifier: 1
   airAccelerationModifier: 1
-  airJumpForceModifier: 1
-  groundJumpForceModifier: 1
+  horizontalFrictionModifier: 0
+  groundJumpVelocityModifier: 1
+  airJumpVelocityModifier: 1
   jumpForceOvertimeModifier: 1
-  slideDownSpeedModifier: 1
+  wallSlideFrictionModifier: 0
   wallPushOutForceModifier: 1
+  wallPushUpForceModifier: 0
 --- !u!1001 &2325853633095542868
 PrefabInstance:
   m_ObjectHideFlags: 0

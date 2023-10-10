@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class Player : MonoBehaviour
 {
@@ -25,6 +26,20 @@ public class Player : MonoBehaviour
         OnGround,
         HugWall,
         OnAir
+    }
+
+    enum PlayerStat
+    {
+        GroundJumpVelocity,
+        AirJumpVelocity,
+        JumpForceOverTime,
+
+        GroundAcceleration,
+        AirAcceleration,
+
+        WallSlideDrag,
+        WallPushOutForce,
+        WallPushUpVelocity
     }
 
     struct PlayerMovementData
@@ -48,43 +63,45 @@ public class Player : MonoBehaviour
         }
     }
 
-    [Header("Jump")]
-    [SerializeField] float groundJumpForce = 10;
-    [SerializeField] float airJumpForce = 10;
-    [SerializeField] float jumpForceOvertime = 1;
-    [SerializeField] float jumpDuration = 0.3f;
-
-    [Header("Moving")]
-    [SerializeField] float horizontalDrag = 10;
-    [SerializeField] float groundAcceleration = 10;
-    [SerializeField] float horizontalMaxSpeed = 10;
-    [SerializeField] float airAcceleration = 100;
-
-
     [Header("Detector")]
     [SerializeField] ColliderFilter groundDetector;
     [SerializeField] ColliderFilter leftWallDetector;
     [SerializeField] ColliderFilter rightWallDetector;
 
+    [Header("Jump")]
+    [SerializeField] float groundJumpVelocity = 10;
+    [SerializeField] float airJumpVelocity = 10;
+    [SerializeField] float jumpForceOvertime = 1;
+    [SerializeField] float jumpDuration = 0.3f;
+
+    [Header("Horizontal")]
+    [SerializeField] float groundAcceleration = 10;
+    [SerializeField] float airAcceleration = 100;
+    
     [Header("Wall")]
     [SerializeField] float hugWallReleaseDuration = 0.3f;
-    [SerializeField] float slideDownGravity = 0.3f;
     [SerializeField] float wallPushOutForce = 10;
+    [SerializeField] float wallPushUpVelocity = 10;
+
+    [Header("Friction")]
+    [SerializeField][Range(0, 1)] float groundDrag = 10;
+    [SerializeField][Range(0, 1)] float horizontalAirDrag = 10;
+    [SerializeField][Range(0f, 1f)] float wallSlideDrag = 0.3f;
 
     [Header("Tireness Scales")]
     [Range(0f, 10   )] [SerializeField] float tireness = 1;
-    [Space]
+    [Header("Modifier")]
     [Range(0f, 10f  )] [SerializeField] float groundAccelerationModifier = 1;
-    [Range(0f, 5f   )] [SerializeField] float horizontalMaxSpeedModifier = 1;
     [Range(0f, 10f  )] [SerializeField] float airAccelerationModifier = 1;
     [Space]
-    [Range(0f, 5f   )] [SerializeField] float airJumpForceModifier = 1;
-    [Range(0f, 5f   )] [SerializeField] float groundJumpForceModifier = 1;
+    [Range(0f, 5f   )] [SerializeField] float groundJumpVelocityModifier = 1;
+    [Range(0f, 5f   )] [SerializeField] float airJumpVelocityModifier = 1;
     [Range(0f, 10f  )] [SerializeField] float jumpForceOvertimeModifier = 1;
     [Space]
-    [Range(0f, 10f  )] [SerializeField] float slideDownSpeedModifier = 1;
+    [Range(0f, 10f  )] [SerializeField] float wallSlideDragModifier;
     [Range(0f, 5f   )] [SerializeField] float wallPushOutForceModifier = 1;
-  
+    [Range(0f, 10f  )] [SerializeField] float wallPushUpVelocityModifier;
+
 
     Rigidbody2D rb;
 
@@ -97,7 +114,6 @@ public class Player : MonoBehaviour
     List<PlayerInputEvent> playerEvents = new();
     PlayerState currentPlayerState;
     PlayerMovementData movementData;
-
 
     private void Start()
     {
@@ -115,6 +131,8 @@ public class Player : MonoBehaviour
         UpdateHorizontalMovement();
         UpdateJumpLogic();
         UpdateHugWallLogic();
+
+        ApplyResistance();
 
         //Debug.Log(currentPlayerState.ToString());
 
@@ -185,21 +203,26 @@ public class Player : MonoBehaviour
 
         if (currentPlayerState != PlayerState.HugWall) return;
 
-        rb.gravityScale = GetSlideDownGravity();
+        //rb.gravityScale = GetSlideDownGravity();
+
+        if(rb.velocity.y < 0)
+        {
+            rb.AddForce(Vector2.up * (-rb.velocity.y * GetStat(PlayerStat.WallSlideDrag)), ForceMode2D.Impulse);
+        }
 
         if (movementData.IsMoving() && SignOf(GetHugWallDirection().x) != SignOf(movementData.GetMoveAxis()))
         {
             if( movementData.startMoving )
             {
                 hugWallReleaseTimer = 0;
-                Debug.Log("============================");
+                //Debug.Log("============================");
             }
 
-            Debug.Log(hugWallReleaseTimer);
+            //Debug.Log(hugWallReleaseTimer);
 
             if (hugWallReleaseTimer > hugWallReleaseDuration)
             {
-                 rb.AddForce(movementData.GetMoveDirection() * GetAirAcceleration());
+                rb.AddForce(movementData.GetMoveDirection() * GetStat(PlayerStat.AirAcceleration));
             }
         }
 
@@ -210,18 +233,19 @@ public class Player : MonoBehaviour
     {
         if(currentPlayerState == PlayerState.OnAir || currentPlayerState == PlayerState.OnGround)
         {
-            float acceleration = IsOnGround() ? GetGroundAcceleration() : GetAirAcceleration();
+            float acceleration = IsOnGround() ? GetStat(PlayerStat.GroundAcceleration) : GetStat(PlayerStat.AirAcceleration);
             rb.AddForce(movementData.GetMoveDirection() * acceleration);
         }
-
-        ApplyHorizontalDrag();
     }
 
-    private void ApplyHorizontalDrag()
+    private void ApplyResistance()
     {
-        float dragMagnitude = (rb.velocity.x * rb.velocity.x * horizontalDrag);
-        Vector2 dragForce = Vector2.right * -SignOf(rb.velocity.x) * dragMagnitude;
-        rb.AddForce(dragForce);
+        if (currentPlayerState == PlayerState.OnGround)
+            rb.velocity = new Vector2(rb.velocity.x * (1 - groundDrag), rb.velocity.y);
+        else
+        {
+            rb.velocity = new Vector2(rb.velocity.x * (1 - horizontalAirDrag), rb.velocity.y);
+        }
     }
 
     private void UpdateJumpLogic()
@@ -230,21 +254,17 @@ public class Player : MonoBehaviour
         {
             if (currentPlayerState == PlayerState.HugWall || currentPlayerState == PlayerState.OnGround)
             {
-                rb.AddForce(Vector2.up * GetGroundJumpForce(), ForceMode2D.Impulse);
-
                 if(currentPlayerState == PlayerState.HugWall)
-                    rb.AddForce(-GetHugWallDirection() * GetWallPushOutForce(), ForceMode2D.Impulse);
-
-                // Debug.Log("GetTouchedWallDirection" + GetTouchedWallDirection());
+                {
+                    ApplyWallForces();
+                }
 
                 groundJumped = true;
                 jumpTimer = 0;
             }
             else if (groundJumped)
             {
-                rb.AddForce(Vector2.up * GetAirJumpForce(), ForceMode2D.Impulse);
                 groundJumped = false;
-
                 jumpTimer = 0;
             }
         }
@@ -256,13 +276,22 @@ public class Player : MonoBehaviour
 
         bool isJumping = jumpTimer < jumpDuration;
 
-        if (isJumping && currentPlayerState == PlayerState.OnAir)
+        if (isJumping)
         {
-            rb.AddForce(Vector2.up * GetJumpForceOvertime());
+            rb.velocity = new Vector2(
+                rb.velocity.x, GetStat(groundJumped ?
+                PlayerStat.GroundJumpVelocity : PlayerStat.AirJumpVelocity));
+
             jumpTimer += Time.deltaTime;
         }
     }
-    
+
+    private void ApplyWallForces()
+    {
+        rb.AddForce(-GetHugWallDirection() * GetStat(PlayerStat.WallPushOutForce), ForceMode2D.Impulse);
+        rb.velocity = new Vector2(rb.velocity.x, GetStat(PlayerStat.WallPushUpVelocity));
+    }
+
     bool IsHugWall()
     {
         return leftWallDetector.GetTouchCols().Count > 0 || rightWallDetector.GetTouchCols().Count > 0;
@@ -302,44 +331,57 @@ public class Player : MonoBehaviour
             playerEvents.Add(PlayerInputEvent.StopMoveRight);
     }
 
-    float GetHorizontalSpeed()
-    {
-        return horizontalMaxSpeed - Mathf.Min(horizontalMaxSpeed, tireness * horizontalMaxSpeedModifier);
-    }
 
-    float GetGroundJumpForce()
+    float GetStat(PlayerStat stat)
     {
-        return groundJumpForce - Mathf.Min(groundJumpForce, tireness * groundJumpForceModifier);
-    }
+        float baseStat = 0, modifier = 0;
+        switch (stat)
+        {
+            case PlayerStat.GroundJumpVelocity:
+                baseStat =  groundJumpVelocity;
+                modifier =  groundJumpVelocityModifier;
 
-    float GetSlideDownGravity()
-    {
-        return slideDownGravity - Mathf.Min(slideDownGravity, tireness * slideDownSpeedModifier);
-    }
+                break;
+            case PlayerStat.AirJumpVelocity:
+                baseStat =  airJumpVelocity;
+                modifier =  airJumpVelocityModifier;
 
-    float GetAirAcceleration()
-    {
-        return airAcceleration - Mathf.Min(airAcceleration, tireness * airAccelerationModifier);
-    }
+                break;
+            case PlayerStat.JumpForceOverTime:
+                baseStat =  jumpForceOvertime;
+                modifier =  jumpForceOvertimeModifier;
 
-    float GetAirJumpForce()
-    {
-        return airJumpForce - Mathf.Min(airJumpForce, tireness * airJumpForceModifier);
-    }
+                break;
+            case PlayerStat.GroundAcceleration:
+                baseStat =  groundAcceleration;
+                modifier =  groundAccelerationModifier;
 
-    float GetWallPushOutForce()
-    {
-        return wallPushOutForce - Mathf.Min(wallPushOutForce, tireness * wallPushOutForceModifier);
-    }
+                break;
+            case PlayerStat.AirAcceleration:
+                baseStat =  airAcceleration;
+                modifier =  airAccelerationModifier;
 
-    float GetJumpForceOvertime()
-    {
-        return jumpForceOvertime - Mathf.Min(jumpForceOvertime, tireness * jumpForceOvertimeModifier);
-    }
+                break;
+            case PlayerStat.WallSlideDrag:
+                baseStat =  wallSlideDrag;
+                modifier =  wallSlideDragModifier;
 
-    float GetGroundAcceleration()
-    {
-        return groundAcceleration - Mathf.Min(groundAcceleration, tireness * groundAccelerationModifier);
+                break;
+            case PlayerStat.WallPushOutForce:
+                baseStat =  wallPushOutForce;
+                modifier =  wallPushOutForceModifier;
+
+                break;
+            case PlayerStat.WallPushUpVelocity:
+                baseStat =  wallPushUpVelocity;
+                modifier =  wallPushUpVelocityModifier;
+
+                break;
+            default:
+                break;
+        }
+
+        return baseStat - Mathf.Min(baseStat, tireness * modifier);
     }
 
     int SignOf(float value)
