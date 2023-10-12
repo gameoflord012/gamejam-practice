@@ -64,3 +64,6 @@ TagManager:
   - name: light
     uniqueID: 986952463
     locked: 0
+  - name: transition layer
+    uniqueID: 838080911
+    locked: 0
